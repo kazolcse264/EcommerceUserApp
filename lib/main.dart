@@ -1,5 +1,7 @@
 
 
+import 'package:ecom_users/pages/otp_verification_page.dart';
+import 'package:ecom_users/pages/user_profile_page.dart';
 import 'package:ecom_users/pages/launcher_page.dart';
 import 'package:ecom_users/pages/login_page.dart';
 import 'package:ecom_users/pages/order_list_page.dart';
@@ -45,8 +47,10 @@ class MyApp extends StatelessWidget {
         LauncherPage.routeName: (context) => const LauncherPage(),
         LoginPage.routeName: (context) => const LoginPage(),
         OrderListPage.routeName: (context) => const OrderListPage(),
-        ProductDetailsPage.routeName: (context) => ProductDetailsPage(),
+        ProductDetailsPage.routeName: (context) => const ProductDetailsPage(),
         ViewProductPage.routeName: (context) => const ViewProductPage(),
+        UserProfilePage.routeName: (context) => const UserProfilePage(),
+        OtpVerificationPage.routeName: (context) => const OtpVerificationPage(),
       },
     );
   }

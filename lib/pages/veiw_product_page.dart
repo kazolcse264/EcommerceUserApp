@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ecom_users/pages/product_details_page.dart';
+import 'package:ecom_users/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -25,6 +26,7 @@ class _ViewProductPageState extends State<ViewProductPage> {
   Provider.of<ProductProvider>(context,listen: false).getAllProducts();
   Provider.of<ProductProvider>(context,listen: false).getAllPurchases();
   Provider.of<OrderProvider>(context,listen: false).getOrderConstants();
+  Provider.of<UserProvider>(context,listen: false).getUserInfo();
     super.didChangeDependencies();
   }
   @override

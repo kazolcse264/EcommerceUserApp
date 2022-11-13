@@ -20,7 +20,7 @@ class UserModel {
   String? gender;
   String? phone;
   String email;
-  num? age;
+  String? age;
   Timestamp? userCreationTime;
   AddressModel? addressModel;
 

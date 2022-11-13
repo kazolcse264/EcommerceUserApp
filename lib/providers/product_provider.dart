@@ -98,7 +98,4 @@ class ProductProvider extends ChangeNotifier {
     return salePrice - discountPrice;
   }
 
-  Future<void> updateProductField(String productId, String field, dynamic value) {
-    return DbHelper.updateProductField(productId,{field:value});
-  }
 }

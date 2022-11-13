@@ -25,6 +25,14 @@ class DbHelper {
     return doc.set(userModel.toMap());
   }
 
+  static Stream<DocumentSnapshot<Map<String, dynamic>>> getUserInfo(String uid) =>
+      _db.collection(collectionUsers).doc(uid).snapshots();
+
+
+
+
+
+
   static Future<void> addCategory(CategoryModel categoryModel) {
     final catDoc = _db.collection(collectionCategory).doc();
     categoryModel.categoryId = catDoc.id;
@@ -90,9 +98,10 @@ class DbHelper {
     return wb.commit();
   }
 
-  static Future<void> updateProductField(String productId, Map<String, dynamic> map) {
-    return _db.collection(collectionProducts).doc(productId).update(map);
+  static Future<void> updateUserProfileField(String uid, Map<String, dynamic> map) {
+    return _db.collection(collectionUsers).doc(uid).update(map);
   }
+
   static Stream<DocumentSnapshot<Map<String, dynamic>>> getOrderConstants() =>
       _db.collection(collectionUtils).doc(documentOrderConstants).snapshots();
 

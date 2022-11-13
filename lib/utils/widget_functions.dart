@@ -32,8 +32,10 @@ void showSingleTextFieldInputDialog({
               TextButton(
                 onPressed: () {
                   if(textController.text.isEmpty) return;
-                  onSubmit(textController.text);
+                  final value = textController.text;
                   Navigator.pop(context);
+                  onSubmit(value);
+
                 },
                 child: Text(positiveButton),
               ),
