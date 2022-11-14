@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ecom_users/custom_widgets/product_grid_item_view.dart';
 import 'package:ecom_users/pages/product_details_page.dart';
 import 'package:ecom_users/providers/user_provider.dart';
 import 'package:flutter/material.dart';
@@ -20,15 +21,17 @@ class ViewProductPage extends StatefulWidget {
 
 class _ViewProductPageState extends State<ViewProductPage> {
   CategoryModel? categoryModel;
-@override
+
+  @override
   void didChangeDependencies() {
-  Provider.of<ProductProvider>(context,listen: false).getAllCategories();
-  Provider.of<ProductProvider>(context,listen: false).getAllProducts();
-  Provider.of<ProductProvider>(context,listen: false).getAllPurchases();
-  Provider.of<OrderProvider>(context,listen: false).getOrderConstants();
-  Provider.of<UserProvider>(context,listen: false).getUserInfo();
+    Provider.of<ProductProvider>(context, listen: false).getAllCategories();
+    Provider.of<ProductProvider>(context, listen: false).getAllProducts();
+    Provider.of<ProductProvider>(context, listen: false).getAllPurchases();
+    Provider.of<OrderProvider>(context, listen: false).getOrderConstants();
+    Provider.of<UserProvider>(context, listen: false).getUserInfo();
     super.didChangeDependencies();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,29 +80,18 @@ class _ViewProductPageState extends State<ViewProductPage> {
                   }),
             ),
             Expanded(
-                child: ListView.builder(
-              itemCount: provider.productList.length,
-              itemBuilder: (context, index) {
-                final product = provider.productList[index];
-                return ListTile(
-                  onTap: () => Navigator.pushNamed(
-                      context, ProductDetailsPage.routeName,
-                      arguments: product),
-                  leading: CachedNetworkImage(
-                    width: 50,
-                    imageUrl: product.thumbnailImageModel.imageDownloadUrl,
-                    placeholder: (context, url) => const Center(
-                      child: CircularProgressIndicator(),
+                child: GridView.builder(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.65,
                     ),
-                    errorWidget: (context, url, error) =>
-                        const Icon(Icons.error),
-                  ),
-                  title: Text(product.productName),
-                  subtitle: Text(product.category.categoryName),
-                  trailing: Text('Stock ${product.stock}'),
-                );
-              },
-            )),
+                    itemCount: provider.productList.length,
+                    itemBuilder: (context, index){
+                      final product = provider.productList[index];
+                      return ProductGridItemView(
+                        productModel: product,
+                      );
+                    })),
           ],
         ),
       ),

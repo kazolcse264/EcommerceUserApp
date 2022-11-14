@@ -124,7 +124,15 @@ class _LoginPageState extends State<LoginPage> {
                 title: const Text('SIGIN IN WITH GOOGLE'),
               ),
               TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  EasyLoading.show(status: 'Please wait...');
+                  AuthService.signInAnonymously().then((value) {
+                    EasyLoading.dismiss();
+                    Navigator.pushReplacementNamed(
+                        context, LauncherPage.routeName);
+                  }
+                    );
+                },
                 child: const Text('Login as Guest'),
               ),
             ],

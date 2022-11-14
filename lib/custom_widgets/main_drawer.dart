@@ -16,7 +16,7 @@ class MainDrawer extends StatelessWidget {
             height: 150,
             color: Theme.of(context).primaryColor,
           ),
-           ListTile(
+           if(!AuthService.currentUser!.isAnonymous)ListTile(
             onTap: (){
               Navigator.pop(context);
               Navigator.pushNamed(context, UserProfilePage.routeName);
@@ -24,12 +24,12 @@ class MainDrawer extends StatelessWidget {
             leading: const Icon(Icons.person),
             title: const Text('My Profile'),
           ),
-           ListTile(
+          if(!AuthService.currentUser!.isAnonymous) ListTile(
             onTap: (){},
             leading: const Icon(Icons.shopping_cart),
             title: const Text('My Carts'),
           ),
-          ListTile(
+          if(!AuthService.currentUser!.isAnonymous)ListTile(
             onTap: (){},
             leading: const Icon(Icons.monetization_on),
             title: const Text('My Orders'),

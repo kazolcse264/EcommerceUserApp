@@ -14,3 +14,7 @@ Future<bool> isConnectedToInternet() async{
   var result = await (Connectivity().checkConnectivity());
   return result == ConnectivityResult.wifi || result == ConnectivityResult.mobile;
 }
+
+String getPriceAfterDiscount(num price, num discount){
+  return (price-(price*discount)/100).toStringAsFixed(0);
+}
