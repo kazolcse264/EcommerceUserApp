@@ -49,6 +49,7 @@ dependencies:
   google_sign_in:
   pin_code_fields:
   flutter_rating_bar:
+  flutter_zoom_drawer:
 
 dev_dependencies:
   flutter_test:

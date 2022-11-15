@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ecom_users/models/rating_model.dart';
 
 import '../models/category_model.dart';
 import '../models/order_constant_model.dart';
@@ -25,13 +26,26 @@ class DbHelper {
     return doc.set(userModel.toMap());
   }
 
-  static Stream<DocumentSnapshot<Map<String, dynamic>>> getUserInfo(String uid) =>
+  static Stream<DocumentSnapshot<Map<String, dynamic>>> getUserInfo(
+          String uid) =>
       _db.collection(collectionUsers).doc(uid).snapshots();
 
+  static Future<void> addRating(RatingModel ratingModel) {
+    final ratingDoc = _db
+        .collection(collectionProducts)
+        .doc(ratingModel.productId)
+        .collection(collectionRating)
+        .doc(ratingModel.userModel.userId);
+    return ratingDoc.set(ratingModel.toMap());
+  }
 
-
-
-
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getRatingsByProduct(
+          String proId) =>
+      _db
+          .collection(collectionProducts)
+          .doc(proId)
+          .collection(collectionRating)
+          .snapshots();
 
   static Future<void> addCategory(CategoryModel categoryModel) {
     final catDoc = _db.collection(collectionCategory).doc();
@@ -50,7 +64,8 @@ class DbHelper {
 
   static Future<QuerySnapshot<Map<String, dynamic>>> getAllPurchaseByProductId(
           String productId) =>
-      _db.collection(collectionPurchase)
+      _db
+          .collection(collectionPurchase)
           .where(purchaseFieldProductId, isEqualTo: productId)
           .get();
 
@@ -83,22 +98,34 @@ class DbHelper {
     return wb.commit();
   }
 
-
-  static Future<void> repurchase(PurchaseModel purchaseModel, ProductModel productModel) async {
+  static Future<void> repurchase(
+      PurchaseModel purchaseModel, ProductModel productModel) async {
     final wb = _db.batch();
     final doc = _db.collection(collectionPurchase).doc();
     purchaseModel.purchaseId = doc.id;
     wb.set(doc, purchaseModel.toMap());
-    final productDoc = _db.collection(collectionProducts).doc(productModel.productId);
-    wb.update(productDoc, {productFieldStock : (productModel.stock + purchaseModel.purchaseQuantity)});
-    final snapshot = await _db.collection(collectionCategory).doc(productModel.category.categoryId).get();
+    final productDoc =
+        _db.collection(collectionProducts).doc(productModel.productId);
+    wb.update(productDoc, {
+      productFieldStock: (productModel.stock + purchaseModel.purchaseQuantity)
+    });
+    final snapshot = await _db
+        .collection(collectionCategory)
+        .doc(productModel.category.categoryId)
+        .get();
     final previousCount = snapshot.data()?[categoryFieldProductCount] ?? 0;
-    final catDoc = _db.collection(collectionCategory).doc(productModel.category.categoryId);
-    wb.update(catDoc, {categoryFieldProductCount : (purchaseModel.purchaseQuantity + previousCount)});
+    final catDoc = _db
+        .collection(collectionCategory)
+        .doc(productModel.category.categoryId);
+    wb.update(catDoc, {
+      categoryFieldProductCount:
+          (purchaseModel.purchaseQuantity + previousCount)
+    });
     return wb.commit();
   }
 
-  static Future<void> updateUserProfileField(String uid, Map<String, dynamic> map) {
+  static Future<void> updateUserProfileField(
+      String uid, Map<String, dynamic> map) {
     return _db.collection(collectionUsers).doc(uid).update(map);
   }
 
@@ -106,9 +133,14 @@ class DbHelper {
       _db.collection(collectionUtils).doc(documentOrderConstants).snapshots();
 
   static Future<void> updateOrderConstants(OrderConstantModel model) {
-    return _db.collection(collectionUtils)
+    return _db
+        .collection(collectionUtils)
         .doc(documentOrderConstants)
         .update(model.toMap());
   }
 
+  static Future<void> updateProductField(
+      String productId, Map<String, dynamic> map) {
+    return _db.collection(collectionProducts).doc(productId).update(map);
+  }
 }

@@ -162,13 +162,14 @@ class _LoginPageState extends State<LoginPage> {
           );
           userProvider.addUser(userModel).then((value) {
             EasyLoading.dismiss();
-            if (mounted) {
-              Navigator.pushReplacementNamed(context, LauncherPage.routeName);
-            }
+
           }).catchError((error) {
             EasyLoading.dismiss();
             showMsg(context, 'could not save user info');
           });
+        }
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, LauncherPage.routeName);
         }
       } on FirebaseAuthException catch (error) {
         EasyLoading.dismiss();

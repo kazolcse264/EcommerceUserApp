@@ -1,6 +1,5 @@
-import 'package:cached_network_image/cached_network_image.dart';
+
 import 'package:ecom_users/custom_widgets/product_grid_item_view.dart';
-import 'package:ecom_users/pages/product_details_page.dart';
 import 'package:ecom_users/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

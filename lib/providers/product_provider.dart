@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:ecom_users/auth/auth_service.dart';
+import 'package:ecom_users/models/rating_model.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
@@ -8,6 +10,7 @@ import '../models/category_model.dart';
 import '../models/image_model.dart';
 import '../models/product_models.dart';
 import '../models/purchase_model.dart';
+import '../models/user_model.dart';
 import '../utils/constants.dart';
 
 class ProductProvider extends ChangeNotifier {
@@ -18,6 +21,16 @@ class ProductProvider extends ChangeNotifier {
   Future<void> addCategory(String category) {
     final categoryModel = CategoryModel(categoryName: category);
     return DbHelper.addCategory(categoryModel);
+  }
+
+  Future<void> addRating(String productId, double rating, UserModel userModel) {
+    final ratingModel = RatingModel(
+      ratingId: AuthService.currentUser!.uid,
+      userModel: userModel,
+      productId: productId,
+      rating: rating,
+    );
+    return DbHelper.addRating(ratingModel);
   }
 
   getAllCategories() {
@@ -39,17 +52,18 @@ class ProductProvider extends ChangeNotifier {
     });
   }
 
-
   getAllPurchases() {
     DbHelper.getAllPurchases().listen((snapshot) {
       purchaseList = List.generate(snapshot.docs.length,
-              (index) => PurchaseModel.fromMap(snapshot.docs[index].data()));
+          (index) => PurchaseModel.fromMap(snapshot.docs[index].data()));
       notifyListeners();
     });
   }
 
-  List<PurchaseModel> getPurchasesByProductId(String productId){
-    return purchaseList.where((element) => element.productId == productId).toList();
+  List<PurchaseModel> getPurchasesByProductId(String productId) {
+    return purchaseList
+        .where((element) => element.productId == productId)
+        .toList();
   }
 
   getAllProductsByCategory(String categoryName) {
@@ -93,9 +107,13 @@ class ProductProvider extends ChangeNotifier {
     return DbHelper.repurchase(purchaseModel, productModel);
   }
 
-   double priceAfterDisCount(num salePrice, num productDiscount) {
-    final discountPrice = (salePrice*productDiscount)/100;
+  double priceAfterDisCount(num salePrice, num productDiscount) {
+    final discountPrice = (salePrice * productDiscount) / 100;
     return salePrice - discountPrice;
   }
 
+  Future<void> updateProductField(
+      String productId, String field, dynamic value) {
+    return DbHelper.updateProductField(productId, {field: value});
+  }
 }
