@@ -6,16 +6,16 @@ const String commentFieldCommentId = 'commentId';
 const String commentFieldUserModel = 'userModel';
 const String commentFieldProductId = 'productId';
 const String commentFieldComment = 'comment';
-const String commentFieldApproved = 'approved';
 const String commentFieldDate = 'date';
+const String commentFieldApproved = 'approved';
 
 class CommentModel {
   String? commentId;
   UserModel userModel;
   String productId;
   String comment;
-  bool approved;
   String date;
+  bool approved;
 
   CommentModel({
      this.commentId,
@@ -42,7 +42,7 @@ class CommentModel {
         userModel: UserModel.fromMap(map[commentFieldUserModel]),
         productId: map[commentFieldProductId],
         comment: map[commentFieldComment],
-        approved: map[commentFieldApproved],
         date: map[commentFieldDate],
+        approved: map[commentFieldApproved],
       );
 }

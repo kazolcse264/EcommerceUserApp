@@ -6,11 +6,16 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../auth/auth_service.dart';
 import '../custom_widgets/photo_frame_view.dart';
+import '../models/comment_model.dart';
 import '../models/product_models.dart';
+import '../providers/cart_provider.dart';
 import '../providers/product_provider.dart';
 import '../utils/constants.dart';
 import '../utils/helper_functions.dart';
+import '../utils/widget_functions.dart';
+import 'login_page.dart';
 
 class ProductDetailsPage extends StatefulWidget {
   static const String routeName = '/product_details';
@@ -30,6 +35,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
   double userRating = 0.0;
   TextEditingController reviewTextController = TextEditingController();
   String photoUrl = '';
+  final txtController = TextEditingController();
 
   @override
   void didChangeDependencies() {
@@ -104,63 +110,51 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                     );
             }).toList(),
           ]),
-          /*SizedBox(
-            height: 75,
-            child: Card(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  PhotoFrameView(
-                    onImagePressed: () {
-                      _showImageInDialog(0);
-                    },
-                    url: productModel.additionalImageModels[0],
-                    child: IconButton(
-                        onPressed: () {
-                          _addImage(0);
-                        },
-                        icon: const Icon(Icons.add)),
-                  ),
-                  PhotoFrameView(
-                    onImagePressed: () {
-                      _showImageInDialog(1);
-                    },
-                    url: productModel.additionalImageModels[1],
-                    child: IconButton(
-                        onPressed: () {
-                          _addImage(1);
-                        },
-                        icon: const Icon(Icons.add)),
-                  ),
-                  PhotoFrameView(
-                    onImagePressed: () {
-                      _showImageInDialog(2);
-                    },
-                    url: productModel.additionalImageModels[2],
-                    child: IconButton(
-                        onPressed: () {
-                          _addImage(2);
-                        },
-                        icon: const Icon(Icons.add)),
-                  ),
-                ],
-              ),
-            ),
-          ),*/
           Row(
             children: [
               Expanded(
-                  child: TextButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.favorite),
-                label: const Text('ADD TO FAVORITE'),
-              )),
+                child: TextButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(Icons.favorite),
+                  label: const Text('ADD TO FAVORITE'),
+                ),
+              ),
               Expanded(
-                  child: TextButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.favorite),
-                label: const Text('ADD TO CART'),
-              )),
+                child: Consumer<CartProvider>(
+                  builder: (context, provider, child) {
+                    final isInCart =
+                    provider.isProductInCart(productModel.productId!);
+                    return TextButton.icon(
+                      onPressed: () async {
+                        EasyLoading.show(status: 'Please wait');
+                        if (isInCart) {
+                          //remove
+                          await provider
+                              .removeFromCart(productModel.productId!);
+                          if(mounted)showMsg(context, 'Removed from Cart');
+                        } else {
+                          await provider.addToCart(
+                            productId: productModel.productId!,
+                            productName: productModel.productName,
+                            url: productModel
+                                .thumbnailImageModel.imageDownloadUrl,
+                            salePrice: num.parse(getPriceAfterDiscount(
+                                productModel.salePrice,
+                                productModel.productDiscount)),
+                          );
+                          if(mounted)showMsg(context, 'Added to Cart');
+                        }
+                        EasyLoading.dismiss();
+                      },
+                      icon: Icon(isInCart
+                          ? Icons.remove_shopping_cart
+                          : Icons.shopping_cart),
+                      label:
+                      Text(isInCart ? 'REMOVE FROM CART' : 'ADD TO CART'),
+                    );
+                  },
+                ),
+              ),
             ],
           ),
           ListTile(
@@ -195,26 +189,23 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
             title: const Text('Description'),
             subtitle: Text('${productModel.longDescription}'),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Card(
-              elevation: 10,
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text(
-                      'Rate this Product',
-                      style: TextStyle(fontSize: 24),
-                    ),
-                    RatingBar.builder(
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Rate this Product'),
+                  Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: RatingBar.builder(
                       initialRating: 3,
                       minRating: 0.0,
                       direction: Axis.horizontal,
                       allowHalfRating: true,
                       itemCount: 5,
-                      itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      ignoreGestures: false,
+                      itemPadding: const EdgeInsets.symmetric(horizontal: 0.0),
                       itemBuilder: (context, _) => const Icon(
                         Icons.star,
                         color: Colors.amber,
@@ -223,75 +214,158 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                         userRating = rating;
                       },
                     ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    /* const Text(
-                      'Write Your Review',
-                      style: TextStyle(fontSize: 24),
-                    ),
-                    TextField(
-                      focusNode: focusNode,
-                      maxLines: 3,
-                      controller: reviewTextController,
-                      decoration:
-                          const InputDecoration(border: OutlineInputBorder()),
-                    ),*/
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: Colors.red,
-                          shape: const RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(20))),
-                        ),
-                        onPressed: () async {
-                          EasyLoading.show(status: 'Please wait...');
-                          focusNode.unfocus();
-                          // _submitReview();
-                          productProvider.addRating(productModel.productId!,
-                              userRating, userProvider.userModel!);
-                          EasyLoading.dismiss();
-                          showMsg(context, 'Thanks for your rating');
-                        },
-                        child: const Text('Submit'),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                  OutlinedButton(
+                    onPressed: () async {
+                      if (AuthService.currentUser!.isAnonymous) {
+                        showCustomDialog(
+                          context: context,
+                          title: 'Unregistered User',
+                          positiveButtonText: 'Login',
+                          content:
+                          'To rate this product, you need to login with your email and password or Google Account. To login with your account, go to Login Page',
+                          onPressed: () {
+                            Navigator.pushNamed(context, LoginPage.routeName);
+                          },
+                        );
+                      } else {
+                        EasyLoading.show(status: 'Please wait');
+                        await productProvider.addRating(
+                          productModel.productId!,
+                          userRating,
+                          userProvider.userModel!,
+                        );
+                        EasyLoading.dismiss();
+                        if(mounted)showMsg(context, 'Thanks for your rating');
+                      }
+                    },
+                    child: const Text('SUBMIT'),
+                  )
+                ],
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Theme.of(context).primaryColor,
-                    shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20))),
-                  ),
-                  onPressed: () {
-                    focusNode.unfocus();
-                    // _submitReview();
-                  },
-                  child: const Text('Show Comments'),
-                ),
-                const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text(
-                    'All Comments',
-                    style: TextStyle(fontSize: 25),
-                  ),
-                ),
-              ],
+            padding: const EdgeInsets.all(8),
+            child: Text(
+              'Comments',
+              style: Theme.of(context).textTheme.headline5,
             ),
           ),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Add your comment'),
+                  Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: TextField(
+                      focusNode: focusNode,
+                      controller: txtController,
+                      maxLines: 3,
+                      decoration:
+                      const InputDecoration(border: OutlineInputBorder()),
+                    ),
+                  ),
+                  OutlinedButton(
+                    onPressed: () async {
+                      if (txtController.text.isEmpty) return;
+                      if (AuthService.currentUser!.isAnonymous) {
+                        showCustomDialog(
+                          context: context,
+                          title: 'Unregistered User',
+                          positiveButtonText: 'Login',
+                          content:
+                          'To comment this product, you need to login with your email and password or Google Account. To login with your account, go to Login Page',
+                          onPressed: () {
+                            Navigator.pushNamed(context, LoginPage.routeName);
+                          },
+                        );
+                      } else {
+                        EasyLoading.show(status: 'Please wait');
+                        await productProvider.addComment(
+                          productModel.productId!,
+                          txtController.text,
+                          userProvider.userModel!,
+                        );
+                        EasyLoading.dismiss();
+                        focusNode.unfocus();
+                        if(mounted) {
+                          showMsg(context,
+                            'Thanks for your comment. Your comment is waiting for Admin approval');
+                        }
+                      }
+                    },
+                    child: const Text('SUBMIT'),
+                  )
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: Text(
+              'All Comments',
+              style: Theme.of(context).textTheme.subtitle1,
+            ),
+          ),
+          FutureBuilder<List<CommentModel>>(
+            future:
+            productProvider.getCommentsByProduct(productModel.productId!),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                final commentList = snapshot.data!;
+                if (commentList.isEmpty) {
+                  return const Center(
+                    child: Text('No comments found'),
+                  );
+                } else {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: commentList
+                        .map((comment) => Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ListTile(
+                          title: Text(comment.userModel.displayName ??
+                              comment.userModel.email),
+                          subtitle: Text(comment.date),
+                          leading: comment.userModel.imageUrl == null
+                              ? const Icon(Icons.person)
+                              : CachedNetworkImage(
+                            width: 70,
+                            height: 100,
+                            fit: BoxFit.fill,
+                            imageUrl: comment.userModel.imageUrl!,
+                            placeholder: (context, url) => const Center(
+                                child:
+                                CircularProgressIndicator()),
+                            errorWidget: (context, url, error) =>
+                                const Icon(Icons.error),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: Text(
+                            comment.comment,
+                          ),
+                        ),
+                      ],
+                    ))
+                        .toList(),
+                  );
+                }
+              }
+              if (snapshot.hasError) {
+                return const Center(child: Text('Failed to load comments'));
+              }
+              return const Center(
+                child: Text('Loading comments'),
+              );
+            },
+          )
 
           /*AllCommentsWidget(
             donorId: id,
@@ -301,74 +375,6 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     );
   }
 
-  void _addImage(int index) async {
-    final selectedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (selectedFile != null) {
-      EasyLoading.show(status: "Please Wait");
-      final imageModel = await productProvider.uploadImage(selectedFile.path);
-      final previousImageList = productModel.additionalImageModels;
-      previousImageList[index] = imageModel.imageDownloadUrl;
-      productProvider
-          .updateProductField(
-              productModel.productId!, productFieldImages, previousImageList)
-          .then((value) {
-        setState(() {
-          productModel.additionalImageModels[index] =
-              imageModel.imageDownloadUrl;
-        });
-        showMsg(context, 'Uploaded');
-        EasyLoading.dismiss();
-      }).catchError((error) {
-        showMsg(context, 'Failed to uploaded');
-        EasyLoading.dismiss();
-      });
-    }
-  }
-
-  void _showImageInDialog(int i) {
-    final url = productModel.additionalImageModels[i];
-    showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-              content: CachedNetworkImage(
-                //width: double.infinity,
-                height: size.height / 2,
-                fit: BoxFit.cover,
-                imageUrl: url,
-                placeholder: (context, url) =>
-                    const Center(child: CircularProgressIndicator()),
-                errorWidget: (context, url, error) => const Icon(Icons.error),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {},
-                  child: const Text('CHANGE'),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    Navigator.pop(context);
-                    EasyLoading.show(status: 'Deleting image');
-                    setState(() {
-                      productModel.additionalImageModels[i] = '';
-                    });
-                    try {
-                      await productProvider.deleteImage(url);
-                      await productProvider.updateProductField(
-                        productModel.productId!,
-                        productFieldImages,
-                        productModel.additionalImageModels,
-                      );
-                      EasyLoading.dismiss();
-                      //if(mounted)  showMsg(context, 'Deleted');
-                    } catch (error) {
-                      EasyLoading.dismiss();
-                      //showMsg(context, 'Failed to Delete');
-                    }
-                  },
-                  child: const Text('DELETE'),
-                ),
-              ],
-            ));
-  }
 }
+
+

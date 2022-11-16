@@ -5,6 +5,7 @@ import 'package:ecom_users/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../custom_widgets/cart_bubble_view.dart';
 import '../custom_widgets/main_drawer.dart';
 import '../models/category_model.dart';
 import '../providers/order_provider.dart';
@@ -39,6 +40,9 @@ class _ViewProductPageState extends State<ViewProductPage> {
       drawer: const MainDrawer(),
       appBar: AppBar(
         title: const Text('All Products'),
+        actions: const [
+          CartBubbleView(),
+        ],
       ),
       body: Consumer<ProductProvider>(
         builder: (context, provider, child) => Column(

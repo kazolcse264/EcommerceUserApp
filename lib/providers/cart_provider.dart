@@ -1,7 +1,8 @@
-import 'package:ecom_users/auth/auth_service.dart';
-import 'package:ecom_users/db/db_helper.dart';
+
 import 'package:flutter/material.dart';
 
+import '../auth/auth_service.dart';
+import '../db/db_helper.dart';
 import '../models/cart_model.dart';
 
 class CartProvider extends ChangeNotifier {
@@ -31,11 +32,11 @@ class CartProvider extends ChangeNotifier {
     return DbHelper.addToCart(AuthService.currentUser!.uid, cartModel);
   }
 
-  bool isProductInCart(String productId){
+  bool isProductInCart(String productId) {
     bool tag = false;
-    for(final cartModel in cartList){
-      if(cartModel.productId == productId){
-        tag =true;
+    for (final cartModel in cartList) {
+      if (cartModel.productId == productId) {
+        tag = true;
         break;
       }
     }

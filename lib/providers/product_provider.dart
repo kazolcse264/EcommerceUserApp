@@ -1,13 +1,13 @@
 import 'dart:io';
 
 import 'package:ecom_users/auth/auth_service.dart';
-import 'package:ecom_users/models/comment_model.dart';
 import 'package:ecom_users/models/rating_model.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
 import '../db/db_helper.dart';
 import '../models/category_model.dart';
+import '../models/comment_model.dart';
 import '../models/image_model.dart';
 import '../models/product_models.dart';
 import '../models/purchase_model.dart';
@@ -36,7 +36,7 @@ class ProductProvider extends ChangeNotifier {
     await DbHelper.addRating(ratingModel);
     final snapshot = await DbHelper.getRatingsByProduct(productId);
     final ratingModelList = List.generate(snapshot.docs.length,
-        (index) => RatingModel.fromMap(snapshot.docs[index].data()));
+            (index) => RatingModel.fromMap(snapshot.docs[index].data()));
     double totalRating = 0.0;
     for (var model in ratingModelList) {
       totalRating += model.rating;
@@ -129,6 +129,13 @@ class ProductProvider extends ChangeNotifier {
     return salePrice - discountPrice;
   }
 
+  Future<List<CommentModel>> getCommentsByProduct(String proId) async {
+    final snapshot = await DbHelper.getCommentsByProduct(proId);
+    final commentList = List.generate(snapshot.docs.length,
+            (index) => CommentModel.fromMap(snapshot.docs[index].data()));
+    return commentList;
+  }
+
   Future<void> addComment(String proId, String comment, UserModel userModel) {
     final commentModel = CommentModel(
       userModel: userModel,
@@ -139,10 +146,4 @@ class ProductProvider extends ChangeNotifier {
     return DbHelper.addComment(commentModel);
   }
 
-  Future<List<CommentModel>> getCommentsByProduct(String proId) async {
-    final snapshot = await DbHelper.getCommentsByProduct(proId);
-    final commentList = List.generate(snapshot.docs.length,
-        (index) => CommentModel.fromMap(snapshot.docs[index].data()));
-    return commentList;
-  }
 }
