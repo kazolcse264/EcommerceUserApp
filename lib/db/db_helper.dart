@@ -39,13 +39,13 @@ class DbHelper {
     return ratingDoc.set(ratingModel.toMap());
   }
 
-  static Stream<QuerySnapshot<Map<String, dynamic>>> getRatingsByProduct(
+  static Future<QuerySnapshot<Map<String, dynamic>>> getRatingsByProduct(
           String proId) =>
       _db
           .collection(collectionProducts)
           .doc(proId)
           .collection(collectionRating)
-          .snapshots();
+          .get();
 
   static Future<void> addCategory(CategoryModel categoryModel) {
     final catDoc = _db.collection(collectionCategory).doc();

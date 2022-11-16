@@ -23,14 +23,29 @@ class ProductProvider extends ChangeNotifier {
     return DbHelper.addCategory(categoryModel);
   }
 
-  Future<void> addRating(String productId, double rating, UserModel userModel) {
+  Future<void> addRating(
+      String productId, double rating, UserModel userModel) async {
     final ratingModel = RatingModel(
       ratingId: AuthService.currentUser!.uid,
       userModel: userModel,
       productId: productId,
       rating: rating,
     );
-    return DbHelper.addRating(ratingModel);
+    await DbHelper.addRating(ratingModel);
+    final snapshot = await DbHelper.getRatingsByProduct(productId);
+    final ratingModelList = List.generate(snapshot.docs.length,
+            (index) => RatingModel.fromMap(snapshot.docs[index].data()));
+    double totalRating = 0.0;
+    for (var model in ratingModelList) {
+      totalRating += model.rating;
+    }
+    final avgRating = totalRating / ratingModelList.length;
+    return updateProductField(
+        ratingModel.productId, productFieldAvgRating, avgRating);
+  }
+
+  Future<void> updateProductField(String proId, String field, dynamic value) {
+    return DbHelper.updateProductField(proId, {field: value});
   }
 
   getAllCategories() {
@@ -112,8 +127,4 @@ class ProductProvider extends ChangeNotifier {
     return salePrice - discountPrice;
   }
 
-  Future<void> updateProductField(
-      String productId, String field, dynamic value) {
-    return DbHelper.updateProductField(productId, {field: value});
-  }
 }

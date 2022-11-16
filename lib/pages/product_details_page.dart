@@ -6,11 +6,14 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../auth/auth_service.dart';
 import '../custom_widgets/photo_frame_view.dart';
 import '../models/product_models.dart';
 import '../providers/product_provider.dart';
 import '../utils/constants.dart';
 import '../utils/helper_functions.dart';
+import '../utils/widget_functions.dart';
+import 'login_page.dart';
 
 class ProductDetailsPage extends StatefulWidget {
   static const String routeName = '/product_details';
@@ -245,16 +248,29 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                           backgroundColor: Colors.red,
                           shape: const RoundedRectangleBorder(
                               borderRadius:
-                                  BorderRadius.all(Radius.circular(20))),
+                              BorderRadius.all(Radius.circular(20))),
                         ),
                         onPressed: () async {
-                          EasyLoading.show(status: 'Please wait...');
-                          focusNode.unfocus();
-                          // _submitReview();
-                          productProvider.addRating(productModel.productId!,
-                              userRating, userProvider.userModel!);
-                          EasyLoading.dismiss();
-                          showMsg(context, 'Thanks for your rating');
+                          if (AuthService.currentUser!.isAnonymous) {
+                            showCustomDialog(
+                              context: context,
+                              title: 'UnRegistered User',
+                              positiveButtonText: 'Login',
+                              content:
+                              'To rate this product, you need to login with your email and password. To login with your account, go to Login Page first.',
+                              onPressed: () {
+                                Navigator.pushNamed(
+                                    context, LoginPage.routeName);
+                              },
+                            );
+                          } else {
+                            EasyLoading.show(status: 'Please wait...');
+                            focusNode.unfocus();
+                            productProvider.addRating(productModel.productId!,
+                                userRating, userProvider.userModel!);
+                            EasyLoading.dismiss();
+                            showMsg(context, 'Thanks for your rating');
+                          }
                         },
                         child: const Text('Submit'),
                       ),
@@ -301,74 +317,4 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
     );
   }
 
-  void _addImage(int index) async {
-    final selectedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (selectedFile != null) {
-      EasyLoading.show(status: "Please Wait");
-      final imageModel = await productProvider.uploadImage(selectedFile.path);
-      final previousImageList = productModel.additionalImageModels;
-      previousImageList[index] = imageModel.imageDownloadUrl;
-      productProvider
-          .updateProductField(
-              productModel.productId!, productFieldImages, previousImageList)
-          .then((value) {
-        setState(() {
-          productModel.additionalImageModels[index] =
-              imageModel.imageDownloadUrl;
-        });
-        showMsg(context, 'Uploaded');
-        EasyLoading.dismiss();
-      }).catchError((error) {
-        showMsg(context, 'Failed to uploaded');
-        EasyLoading.dismiss();
-      });
-    }
-  }
-
-  void _showImageInDialog(int i) {
-    final url = productModel.additionalImageModels[i];
-    showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-              content: CachedNetworkImage(
-                //width: double.infinity,
-                height: size.height / 2,
-                fit: BoxFit.cover,
-                imageUrl: url,
-                placeholder: (context, url) =>
-                    const Center(child: CircularProgressIndicator()),
-                errorWidget: (context, url, error) => const Icon(Icons.error),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {},
-                  child: const Text('CHANGE'),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    Navigator.pop(context);
-                    EasyLoading.show(status: 'Deleting image');
-                    setState(() {
-                      productModel.additionalImageModels[i] = '';
-                    });
-                    try {
-                      await productProvider.deleteImage(url);
-                      await productProvider.updateProductField(
-                        productModel.productId!,
-                        productFieldImages,
-                        productModel.additionalImageModels,
-                      );
-                      EasyLoading.dismiss();
-                      //if(mounted)  showMsg(context, 'Deleted');
-                    } catch (error) {
-                      EasyLoading.dismiss();
-                      //showMsg(context, 'Failed to Delete');
-                    }
-                  },
-                  child: const Text('DELETE'),
-                ),
-              ],
-            ));
-  }
 }
