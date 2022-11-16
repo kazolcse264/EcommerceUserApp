@@ -1,5 +1,6 @@
 
 import 'package:ecom_users/custom_widgets/product_grid_item_view.dart';
+import 'package:ecom_users/providers/cart_provider.dart';
 import 'package:ecom_users/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -28,6 +29,7 @@ class _ViewProductPageState extends State<ViewProductPage> {
     Provider.of<ProductProvider>(context, listen: false).getAllPurchases();
     Provider.of<OrderProvider>(context, listen: false).getOrderConstants();
     Provider.of<UserProvider>(context, listen: false).getUserInfo();
+    Provider.of<CartProvider>(context, listen: false).getAllCartItemsByUser();
     super.didChangeDependencies();
   }
 

@@ -7,19 +7,22 @@ const String commentFieldUserModel = 'userModel';
 const String commentFieldProductId = 'productId';
 const String commentFieldComment = 'comment';
 const String commentFieldApproved = 'approved';
+const String commentFieldDate = 'date';
 
 class CommentModel {
-  String commentId;
+  String? commentId;
   UserModel userModel;
   String productId;
   String comment;
   bool approved;
+  String date;
 
   CommentModel({
-    required this.commentId,
+     this.commentId,
     required this.userModel,
     required this.productId,
     required this.comment,
+    required this.date,
     this.approved = false,
   });
 
@@ -29,6 +32,7 @@ class CommentModel {
       commentFieldUserModel: userModel.toMap(),
       commentFieldProductId: productId,
       commentFieldComment: comment,
+      commentFieldDate: date,
       commentFieldApproved: approved,
     };
   }
@@ -39,5 +43,6 @@ class CommentModel {
         productId: map[commentFieldProductId],
         comment: map[commentFieldComment],
         approved: map[commentFieldApproved],
+        date: map[commentFieldDate],
       );
 }

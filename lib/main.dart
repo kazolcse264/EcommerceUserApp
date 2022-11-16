@@ -8,6 +8,7 @@ import 'package:ecom_users/pages/order_list_page.dart';
 import 'package:ecom_users/pages/product_details_page.dart';
 
 import 'package:ecom_users/pages/veiw_product_page.dart';
+import 'package:ecom_users/providers/cart_provider.dart';
 import 'package:ecom_users/providers/order_provider.dart';
 import 'package:ecom_users/providers/product_provider.dart';
 import 'package:ecom_users/providers/user_provider.dart';
@@ -24,6 +25,7 @@ void main() async {
       ChangeNotifierProvider(create: (_) => ProductProvider()),
       ChangeNotifierProvider(create: (_) => OrderProvider()),
       ChangeNotifierProvider(create: (_) => UserProvider()),
+      ChangeNotifierProvider(create: (_) => CartProvider()),
     ],
     child: const MyApp(),
   ));

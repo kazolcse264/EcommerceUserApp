@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ecom_users/models/cart_model.dart';
+import 'package:ecom_users/models/comment_model.dart';
 import 'package:ecom_users/models/rating_model.dart';
 
 import '../models/category_model.dart';
@@ -39,13 +41,22 @@ class DbHelper {
     return ratingDoc.set(ratingModel.toMap());
   }
 
-  static Stream<QuerySnapshot<Map<String, dynamic>>> getRatingsByProduct(
+  static Future<QuerySnapshot<Map<String, dynamic>>> getRatingsByProduct(
           String proId) =>
       _db
           .collection(collectionProducts)
           .doc(proId)
           .collection(collectionRating)
-          .snapshots();
+          .get();
+
+  static Future<QuerySnapshot<Map<String, dynamic>>> getCommentsByProduct(
+          String proId) =>
+      _db
+          .collection(collectionProducts)
+          .doc(proId)
+          .collection(collectionComment)
+          .where(commentFieldApproved, isEqualTo: true)
+          .get();
 
   static Future<void> addCategory(CategoryModel categoryModel) {
     final catDoc = _db.collection(collectionCategory).doc();
@@ -143,4 +154,38 @@ class DbHelper {
       String productId, Map<String, dynamic> map) {
     return _db.collection(collectionProducts).doc(productId).update(map);
   }
+
+  static Future<void> addComment(CommentModel commentModel) {
+    final doc = _db
+        .collection(collectionProducts)
+        .doc(commentModel.productId)
+        .collection(collectionComment)
+        .doc();
+    commentModel.commentId = doc.id;
+    return doc.set(commentModel.toMap());
+  }
+
+  static Future<void> addToCart(String uid, CartModel cartModel) {
+    return _db
+        .collection(collectionUsers)
+        .doc(uid)
+        .collection(collectionCart)
+        .doc(cartModel.productId)
+        .set(cartModel.toMap());
+  }
+
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getCartItemsByUser(String uid) =>
+      _db.collection(collectionUsers)
+      .doc(uid)
+      .collection(collectionCart)
+      .snapshots();
+
+  static Future<void> removeFromCart(String uid, String pid) {
+    return  _db.collection(collectionUsers)
+        .doc(uid)
+        .collection(collectionCart)
+        .doc(pid).delete();
+  }
+
+
 }

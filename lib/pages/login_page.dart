@@ -25,10 +25,14 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   String _errMsg = '';
   late UserProvider userProvider;
+  bool isAnonymous = false;
 
   @override
   void initState() {
     _passwordController.text = '123456';
+    isAnonymous = AuthService.currentUser == null
+        ? false
+        : AuthService.currentUser!.isAnonymous;
     super.initState();
   }
 
@@ -121,7 +125,7 @@ class _LoginPageState extends State<LoginPage> {
                   _signInWithGoogleAccount();
                 },
                 leading: const Icon(Icons.g_mobiledata),
-                title: const Text('SIGIN IN WITH GOOGLE'),
+                title: const Text('SIGN IN WITH GOOGLE'),
               ),
               TextButton(
                 onPressed: () {
@@ -130,8 +134,7 @@ class _LoginPageState extends State<LoginPage> {
                     EasyLoading.dismiss();
                     Navigator.pushReplacementNamed(
                         context, LauncherPage.routeName);
-                  }
-                    );
+                  });
                 },
                 child: const Text('Login as Guest'),
               ),
@@ -150,32 +153,78 @@ class _LoginPageState extends State<LoginPage> {
       try {
         if (tag) {
           await AuthService.login(email, password);
+          EasyLoading.dismiss();
         } else {
-          await AuthService.register(email, password);
-        }
-        if (!tag) {
-          final userModel = UserModel(
-            userId: AuthService.currentUser!.uid,
-            email: AuthService.currentUser!.email!,
-            userCreationTime: Timestamp.fromDate(
-                AuthService.currentUser!.metadata.creationTime!),
-          );
-          userProvider.addUser(userModel).then((value) {
-            EasyLoading.dismiss();
-
-          }).catchError((error) {
-            EasyLoading.dismiss();
-            showMsg(context, 'could not save user info');
-          });
+          if (AuthService.currentUser != null) {
+            final credential =
+            EmailAuthProvider.credential(email: email, password: password);
+            await convertAnonymousUserIntoRealAccount(credential);
+          } else {
+            await AuthService.register(email, password);
+            final userModel = UserModel(
+              userId: AuthService.currentUser!.uid,
+              email: AuthService.currentUser!.email!,
+              userCreationTime: Timestamp.fromDate(
+                  AuthService.currentUser!.metadata.creationTime!),
+            );
+            userProvider.addUser(userModel).then((value) {
+              EasyLoading.dismiss();
+            }).catchError((error) {
+              EasyLoading.dismiss();
+              showMsg(context, 'could not save user info');
+            });
+          }
         }
         if (mounted) {
-          Navigator.pushReplacementNamed(context, LauncherPage.routeName);
+          if (isAnonymous) {
+            Navigator.pop(context);
+          } else {
+            Navigator.pushReplacementNamed(context, LauncherPage.routeName);
+          }
         }
       } on FirebaseAuthException catch (error) {
         EasyLoading.dismiss();
         setState(() {
           _errMsg = error.message!;
         });
+      }
+    }
+  }
+
+  Future<void> convertAnonymousUserIntoRealAccount(
+      AuthCredential credential) async {
+    try {
+      final userCredential = await FirebaseAuth.instance.currentUser
+          ?.linkWithCredential(credential);
+      if (userCredential!.user != null) {
+        final userModel = UserModel(
+          userId: AuthService.currentUser!.uid,
+          email: AuthService.currentUser!.email!,
+          userCreationTime: Timestamp.fromDate(
+              AuthService.currentUser!.metadata.creationTime!),
+        );
+        userProvider.addUser(userModel).then((value) {
+          EasyLoading.dismiss();
+        }).catchError((error) {
+          EasyLoading.dismiss();
+          showMsg(context, 'could not save user info');
+        });
+      }
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case "provider-already-linked":
+          print("The provider has already been linked to the user.");
+          break;
+        case "invalid-credential":
+          print("The provider's credential is not valid.");
+          break;
+        case "credential-already-in-use":
+          print("The account corresponding to the credential already exists, "
+              "or is already linked to a Firebase User.");
+          break;
+      // See the API reference for the full list of error codes.
+        default:
+          print("Unknown error.");
       }
     }
   }

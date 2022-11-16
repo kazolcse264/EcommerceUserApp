@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:ecom_users/auth/auth_service.dart';
+import 'package:ecom_users/models/comment_model.dart';
 import 'package:ecom_users/models/rating_model.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import '../models/product_models.dart';
 import '../models/purchase_model.dart';
 import '../models/user_model.dart';
 import '../utils/constants.dart';
+import '../utils/helper_functions.dart';
 
 class ProductProvider extends ChangeNotifier {
   List<CategoryModel> categoryList = [];
@@ -23,14 +25,29 @@ class ProductProvider extends ChangeNotifier {
     return DbHelper.addCategory(categoryModel);
   }
 
-  Future<void> addRating(String productId, double rating, UserModel userModel) {
+  Future<void> addRating(
+      String productId, double rating, UserModel userModel) async {
     final ratingModel = RatingModel(
       ratingId: AuthService.currentUser!.uid,
       userModel: userModel,
       productId: productId,
       rating: rating,
     );
-    return DbHelper.addRating(ratingModel);
+    await DbHelper.addRating(ratingModel);
+    final snapshot = await DbHelper.getRatingsByProduct(productId);
+    final ratingModelList = List.generate(snapshot.docs.length,
+        (index) => RatingModel.fromMap(snapshot.docs[index].data()));
+    double totalRating = 0.0;
+    for (var model in ratingModelList) {
+      totalRating += model.rating;
+    }
+    final avgRating = totalRating / ratingModelList.length;
+    return updateProductField(
+        ratingModel.productId, productFieldAvgRating, avgRating);
+  }
+
+  Future<void> updateProductField(String proId, String field, dynamic value) {
+    return DbHelper.updateProductField(proId, {field: value});
   }
 
   getAllCategories() {
@@ -112,8 +129,20 @@ class ProductProvider extends ChangeNotifier {
     return salePrice - discountPrice;
   }
 
-  Future<void> updateProductField(
-      String productId, String field, dynamic value) {
-    return DbHelper.updateProductField(productId, {field: value});
+  Future<void> addComment(String proId, String comment, UserModel userModel) {
+    final commentModel = CommentModel(
+      userModel: userModel,
+      productId: proId,
+      comment: comment,
+      date: getFormattedDate(DateTime.now(), pattern: 'dd/MM/yyyy hh:mm:s a'),
+    );
+    return DbHelper.addComment(commentModel);
+  }
+
+  Future<List<CommentModel>> getCommentsByProduct(String proId) async {
+    final snapshot = await DbHelper.getCommentsByProduct(proId);
+    final commentList = List.generate(snapshot.docs.length,
+        (index) => CommentModel.fromMap(snapshot.docs[index].data()));
+    return commentList;
   }
 }
