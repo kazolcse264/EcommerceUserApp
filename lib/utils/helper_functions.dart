@@ -18,3 +18,6 @@ Future<bool> isConnectedToInternet() async{
 String getPriceAfterDiscount(num price, num discount){
   return (price-(price*discount)/100).toStringAsFixed(0);
 }
+
+String get generateOrderId =>
+    'PB_${getFormattedDate(DateTime.now(), pattern: 'yyyyMMdd_HH:mm:ss')}';

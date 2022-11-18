@@ -50,7 +50,7 @@ class DbHelper {
           .get();
 
   static Future<QuerySnapshot<Map<String, dynamic>>> getCommentsByProduct(
-      String proId) =>
+          String proId) =>
       _db
           .collection(collectionProducts)
           .doc(proId)
@@ -67,8 +67,10 @@ class DbHelper {
   static Stream<QuerySnapshot<Map<String, dynamic>>> getAllCategories() =>
       _db.collection(collectionCategory).snapshots();
 
-  static Stream<QuerySnapshot<Map<String, dynamic>>> getAllProducts() =>
-      _db.collection(collectionProducts).snapshots();
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getAllProducts() => _db
+      .collection(collectionProducts)
+      .where(productFieldAvailable, isEqualTo: true)
+      .snapshots();
 
   static Stream<QuerySnapshot<Map<String, dynamic>>> getAllPurchases() =>
       _db.collection(collectionPurchase).snapshots();
@@ -164,6 +166,7 @@ class DbHelper {
     commentModel.commentId = doc.id;
     return doc.set(commentModel.toMap());
   }
+
   static Future<void> addToCart(String uid, CartModel cartModel) {
     return _db
         .collection(collectionUsers)
@@ -172,8 +175,9 @@ class DbHelper {
         .doc(cartModel.productId)
         .set(cartModel.toMap());
   }
+
   static Stream<QuerySnapshot<Map<String, dynamic>>> getCartItemsByUser(
-      String uid) =>
+          String uid) =>
       _db
           .collection(collectionUsers)
           .doc(uid)
@@ -187,5 +191,27 @@ class DbHelper {
         .collection(collectionCart)
         .doc(pid)
         .delete();
+  }
+
+  static Future<void> updateCartQuantity(String uid, CartModel cartModel) {
+    return _db
+        .collection(collectionUsers)
+        .doc(uid)
+        .collection(collectionCart)
+        .doc(cartModel.productId)
+        .set(cartModel.toMap());
+  }
+
+  static Future<void> clearCart(String uid, List<CartModel> cartList) {
+    final wb = _db.batch();
+    for (final cartModel in cartList) {
+      final doc = _db
+          .collection(collectionUsers)
+          .doc(uid)
+          .collection(collectionCart)
+          .doc(cartModel.productId);
+      wb.delete(doc);
+    }
+    return wb.commit();
   }
 }

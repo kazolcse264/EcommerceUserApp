@@ -1,5 +1,6 @@
 
 import 'package:ecom_users/custom_widgets/product_grid_item_view.dart';
+import 'package:ecom_users/models/user_model.dart';
 import 'package:ecom_users/providers/cart_provider.dart';
 import 'package:ecom_users/providers/user_provider.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +23,6 @@ class ViewProductPage extends StatefulWidget {
 
 class _ViewProductPageState extends State<ViewProductPage> {
   CategoryModel? categoryModel;
-
   @override
   void didChangeDependencies() {
     Provider.of<ProductProvider>(context, listen: false).getAllCategories();
@@ -36,8 +36,9 @@ class _ViewProductPageState extends State<ViewProductPage> {
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
     return Scaffold(
-      drawer: const MainDrawer(),
+      drawer: MainDrawer(userProvider: userProvider,),
       appBar: AppBar(
         title: const Text('All Products'),
         actions: const [

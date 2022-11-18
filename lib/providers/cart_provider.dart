@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../auth/auth_service.dart';
@@ -7,6 +6,11 @@ import '../models/cart_model.dart';
 
 class CartProvider extends ChangeNotifier {
   List<CartModel> cartList = [];
+
+  num priceWithQuantity(CartModel cartModel){
+    return cartModel.salePrice * cartModel.quantity;
+  }
+int get totalItemsInCart => cartList.length;
 
   getAllCartItemsByUser() {
     DbHelper.getCartItemsByUser(AuthService.currentUser!.uid)
@@ -43,7 +47,30 @@ class CartProvider extends ChangeNotifier {
     return tag;
   }
 
+  void increaseQuantity(CartModel cartModel) {
+    cartModel.quantity += 1;
+    DbHelper.updateCartQuantity(AuthService.currentUser!.uid, cartModel);
+  }
+
+  void decreaseQuantity(CartModel cartModel) {
+    if (cartModel.quantity > 1) {
+      cartModel.quantity -= 1;
+      DbHelper.updateCartQuantity(AuthService.currentUser!.uid, cartModel);
+    }
+  }
+  num getCartSubTotal(){
+    num total = 0;
+    for(final cartModel in cartList){
+      total += priceWithQuantity(cartModel);
+    }
+    return total;
+  }
+
   Future<void> removeFromCart(String pid) {
     return DbHelper.removeFromCart(AuthService.currentUser!.uid, pid);
+  }
+
+  Future<void> clearCart() {
+    return DbHelper.clearCart(AuthService.currentUser!.uid, cartList);
   }
 }

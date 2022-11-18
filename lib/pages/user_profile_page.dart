@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ecom_users/custom_widgets/user_profile_image_section.dart';
 import 'package:ecom_users/models/address_model.dart';
 import 'package:ecom_users/models/user_model.dart';
 import 'package:ecom_users/pages/otp_verification_page.dart';
@@ -50,7 +51,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
           ? const Center(child: Text('Failed to load user Data!'))
           : ListView(
               children: [
-                _headerSection(context, userProvider),
+                UserProfileImageSection(userProvider: userProvider),
+                //_headerSection(context, userProvider),
                 ListTile(
                   leading: const Icon(Icons.call),
                   title: Text(userProvider.userModel!.phone ?? 'Not Set Yet'),
@@ -174,7 +176,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     );
   }
 
-  Container _headerSection(BuildContext context, UserProvider userProvider) {
+  /*Container _headerSection(BuildContext context, UserProvider userProvider) {
     return Container(
       height: 150,
       color: Theme.of(context).primaryColor,
@@ -221,5 +223,5 @@ class _UserProfilePageState extends State<UserProfilePage> {
         ],
       ),
     );
-  }
+  }*/
 }

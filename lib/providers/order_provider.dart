@@ -19,4 +19,20 @@ class OrderProvider extends ChangeNotifier {
   Future<void> updateOrderConstants(OrderConstantModel model) {
     return DbHelper.updateOrderConstants(model);
   }
+
+  int getDiscountAmount(num subtotal) {
+    return ((subtotal * orderConstantModel.discount) / 100).round();
+  }
+
+  int getVatAmount(num cartSubTotal) {
+    final priceAfterDiscount = cartSubTotal - getDiscountAmount(cartSubTotal);
+    return ((priceAfterDiscount * orderConstantModel.vat) / 100).round();
+  }
+
+  int getGrandTotal(num cartSubTotal) {
+    return ((cartSubTotal - getDiscountAmount(cartSubTotal)) +
+        getVatAmount(cartSubTotal) +
+        orderConstantModel.deliveryCharge)
+        .round();
+  }
 }

@@ -1,3 +1,4 @@
+import 'package:ecom_users/utils/helper_functions.dart';
 import 'package:flutter/material.dart';
 
 void showSingleTextFieldInputDialog({
@@ -65,3 +66,5 @@ showCustomDialog({
         ],
       ));
 }
+
+String get generateOrderId => 'PB_${getFormattedDate(DateTime.now(),pattern: 'yyyyMMdd_HH:MM:ss')}';
