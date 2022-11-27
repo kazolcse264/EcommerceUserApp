@@ -1,7 +1,15 @@
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ecom_users/models/address_model.dart';
+import 'package:ecom_users/models/date_model.dart';
+import 'package:ecom_users/models/order_model.dart';
+import 'package:ecom_users/pages/order_successful_page.dart';
+import 'package:ecom_users/pages/veiw_product_page.dart';
+import 'package:ecom_users/utils/helper_functions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:provider/provider.dart';
 
+import '../auth/auth_service.dart';
 import '../providers/cart_provider.dart';
 import '../providers/order_provider.dart';
 import '../providers/user_provider.dart';
@@ -220,8 +228,110 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  void _saveOrder() {
+/*  void _saveOrder() async {
+    if (addressLine1Controller.text.isEmpty) {
+      showMsg(context, 'Please provide address line 1');
+      return;
+    }
+    if (zipCodeController.text.isEmpty) {
+      showMsg(context, 'Please provide zip code');
+      return;
+    }
+    if (city == null) {
+      showMsg(context, 'Please select your city');
+      return;
+    }
+    EasyLoading.show(status: 'Please wait');
+    final orderModel = OrderModel(
+      orderId: generateOrderId,
+      userId: AuthService.currentUser!.uid,
+      orderStatus: OrderStatus.pending,
+      paymentMethod: paymentMethodGroupValue,
+      grandTotal: orderProvider.getGrandTotal(
+        cartProvider.getCartSubTotal(),
+      ),
+      discount: orderProvider.orderConstantModel.discount,
+      VAT: orderProvider.orderConstantModel.vat,
+      deliveryCharge: orderProvider.orderConstantModel.deliveryCharge,
+      orderDate: DateModel(
+        timestamp: Timestamp.fromDate(
+          DateTime.now(),
+        ),
+        day: DateTime.now().day,
+        month: DateTime.now().month,
+        year: DateTime.now().year,
+      ),
+      deliveryAddress: AddressModel(
+        addressLine1: addressLine1Controller.text,
+        addressLine2: addressLine2Controller.text,
+        zipcode: zipCodeController.text,
+        city: city,
+      ),
+      productDetails: cartProvider.cartList,
+    );
+    try {
+      await orderProvider.saveOrder(orderModel);
+      EasyLoading.dismiss();
+     if(mounted) {
+       Navigator.pushNamedAndRemoveUntil(context, OrderSuccessfulPage.routeName,
+          ModalRoute.withName(ViewProductPage.routeName));
+     }
+    } catch (error) {
+      EasyLoading.dismiss();
+      showMsg(context, 'Failed to save order');
+    }
+  }*/
+  void _saveOrder() async {
+    if (addressLine1Controller.text.isEmpty) {
+      showMsg(context, 'Please provide address line 1');
+      return;
+    }
 
+    if (zipCodeController.text.isEmpty) {
+      showMsg(context, 'Please provide zipcode');
+      return;
+    }
+
+    if (city == null) {
+      showMsg(context, 'Please select your city');
+      return;
+    }
+
+    EasyLoading.show(status: 'Please wait');
+
+    final orderModel = OrderModel(
+      orderId: generateOrderId,
+      userId: AuthService.currentUser!.uid,
+      orderStatus: OrderStatus.pending,
+      paymentMethod: paymentMethodGroupValue,
+      grandTotal: orderProvider.getGrandTotal(cartProvider.getCartSubTotal()),
+      discount: orderProvider.orderConstantModel.discount,
+      VAT: orderProvider.orderConstantModel.vat,
+      deliveryCharge: orderProvider.orderConstantModel.deliveryCharge,
+      orderDate: DateModel(
+        timestamp: Timestamp.fromDate(DateTime.now()),
+        day: DateTime.now().day,
+        month: DateTime.now().month,
+        year: DateTime.now().year,
+      ),
+      deliveryAddress: AddressModel(
+        addressLine1: addressLine1Controller.text,
+        addressLine2: addressLine2Controller.text,
+        zipcode: zipCodeController.text,
+        city: city,
+      ),
+      productDetails: cartProvider.cartList,
+    );
+
+    try {
+      await orderProvider.saveOrder(orderModel);
+      EasyLoading.dismiss();
+      Navigator.pushNamedAndRemoveUntil(context, OrderSuccessfulPage.routeName,
+          ModalRoute.withName(ViewProductPage.routeName));
+    } catch (error) {
+      EasyLoading.dismiss();
+      showMsg(context, 'Failed to save order');
+    }
   }
 
   void setAddressIfExists() {

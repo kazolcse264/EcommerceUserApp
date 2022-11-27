@@ -64,7 +64,7 @@ class ProductProvider extends ChangeNotifier {
   getAllProducts() {
     DbHelper.getAllProducts().listen((snapshot) {
       productList = List.generate(snapshot.docs.length,
-          (index) => ProductModel.fromMap(snapshot.docs[index].data()));
+              (index) => ProductModel.fromMap(snapshot.docs[index].data()));
       notifyListeners();
     });
   }
@@ -86,9 +86,10 @@ class ProductProvider extends ChangeNotifier {
   getAllProductsByCategory(String categoryName) {
     DbHelper.getAllProductsByCategory(categoryName).listen((snapshot) {
       productList = List.generate(snapshot.docs.length,
-          (index) => ProductModel.fromMap(snapshot.docs[index].data()));
+              (index) => ProductModel.fromMap(snapshot.docs[index].data()));
       notifyListeners();
     });
+
   }
 
   List<CategoryModel> getCategoriesForFiltering() {

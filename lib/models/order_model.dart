@@ -10,6 +10,7 @@ const String orderFieldUserId = 'userId';
 const String orderFieldGrandTotal = 'grandTotal';
 const String orderFieldDiscount = 'discount';
 const String orderFieldVAT = 'VAT';
+const String orderFieldDeliveryCharge = 'deliveryCharge';
 const String orderFieldOrderStatus = 'orderStatus';
 const String orderFieldPaymentMethod = 'paymentMethod';
 const String orderFieldOrderDate = 'orderDate';
@@ -25,6 +26,7 @@ class OrderModel{
   num grandTotal;
   num discount;
   num VAT;
+  num deliveryCharge;
 
   DateModel orderDate;
   AddressModel deliveryAddress;
@@ -38,6 +40,7 @@ class OrderModel{
       required this.grandTotal,
       required this.discount,
       required this.VAT,
+      required this.deliveryCharge,
       required this.orderDate,
       required this.deliveryAddress,
       required this.productDetails});
@@ -51,6 +54,7 @@ class OrderModel{
       orderFieldGrandTotal: grandTotal,
       orderFieldDiscount: discount,
       orderFieldVAT: VAT,
+      orderFieldDeliveryCharge: deliveryCharge,
       orderFieldOrderDate: orderDate.toMap(),
       orderFieldDeliveryAddress: deliveryAddress.toMap(),
       orderFieldProductDetails: List.generate(productDetails.length, (index) => productDetails[index].toMap()),
@@ -66,6 +70,7 @@ class OrderModel{
     grandTotal: map[orderFieldGrandTotal],
     discount: map[orderFieldDiscount],
     VAT: map[orderFieldVAT],
+    deliveryCharge: map[orderFieldDeliveryCharge],
     orderDate: DateModel.fromMap(map[orderFieldOrderDate]),
     deliveryAddress:  AddressModel.fromMap(map[orderFieldDeliveryAddress]),
     productDetails: (map[orderFieldProductDetails] as List).map((e) => CartModel.fromMap(e)).toList(),

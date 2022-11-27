@@ -23,12 +23,17 @@ class ViewProductPage extends StatefulWidget {
 
 class _ViewProductPageState extends State<ViewProductPage> {
   CategoryModel? categoryModel;
+  bool isGetAllProductsCalled = true;
   @override
   void didChangeDependencies() {
     Provider.of<ProductProvider>(context, listen: false).getAllCategories();
-    Provider.of<ProductProvider>(context, listen: false).getAllProducts();
+   if(isGetAllProductsCalled) {
+     Provider.of<ProductProvider>(context, listen: false).getAllProducts();
+     isGetAllProductsCalled = false;
+   }
     Provider.of<ProductProvider>(context, listen: false).getAllPurchases();
     Provider.of<OrderProvider>(context, listen: false).getOrderConstants();
+    Provider.of<OrderProvider>(context, listen: false).getOrdersByUser();
     Provider.of<UserProvider>(context, listen: false).getUserInfo();
     Provider.of<CartProvider>(context, listen: false).getAllCartItemsByUser();
     super.didChangeDependencies();
@@ -57,14 +62,14 @@ class _ViewProductPageState extends State<ViewProductPage> {
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(6),
                           borderSide:
-                              const BorderSide(color: Colors.blue, width: 1))),
+                          const BorderSide(color: Colors.blue, width: 1))),
                   hint: const Text('Select Category'),
                   items: provider
                       .getCategoriesForFiltering()
                       .map((catModel) => DropdownMenuItem(
-                            value: catModel,
-                            child: Text(catModel.categoryName),
-                          ))
+                    value: catModel,
+                    child: Text(catModel.categoryName),
+                  ))
                       .toList(),
                   value: categoryModel,
                   validator: (value) {
@@ -85,6 +90,7 @@ class _ViewProductPageState extends State<ViewProductPage> {
                     }
                   }),
             ),
+
             Expanded(
                 child: GridView.builder(
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

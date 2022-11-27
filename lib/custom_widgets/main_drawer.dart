@@ -1,12 +1,12 @@
 import 'package:ecom_users/auth/auth_service.dart';
 import 'package:ecom_users/custom_widgets/user_profile_image_section.dart';
-import 'package:ecom_users/models/user_model.dart';
 import 'package:ecom_users/pages/user_profile_page.dart';
 import 'package:ecom_users/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 
 import '../pages/cart_page.dart';
 import '../pages/launcher_page.dart';
+import '../pages/order_page.dart';
 
 class MainDrawer extends StatelessWidget {
   final UserProvider userProvider;
@@ -38,7 +38,10 @@ class MainDrawer extends StatelessWidget {
             title: const Text('My Carts'),
           ),
           if(!AuthService.currentUser!.isAnonymous)ListTile(
-            onTap: (){},
+            onTap: (){
+              Navigator.pop(context);
+              Navigator.pushNamed(context, OrderPage.routeName);
+            },
             leading: const Icon(Icons.monetization_on),
             title: const Text('My Orders'),
           ),
