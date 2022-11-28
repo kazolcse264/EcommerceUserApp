@@ -9,6 +9,7 @@ import '../db/db_helper.dart';
 import '../models/category_model.dart';
 import '../models/comment_model.dart';
 import '../models/image_model.dart';
+import '../models/notification_model.dart';
 import '../models/product_models.dart';
 import '../models/purchase_model.dart';
 import '../models/user_model.dart';
@@ -137,14 +138,11 @@ class ProductProvider extends ChangeNotifier {
     return commentList;
   }
 
-  Future<void> addComment(String proId, String comment, UserModel userModel) {
-    final commentModel = CommentModel(
-      userModel: userModel,
-      productId: proId,
-      comment: comment,
-      date: getFormattedDate(DateTime.now(), pattern: 'dd/MM/yyyy hh:mm:s a'),
-    );
+  Future<void> addComment(CommentModel commentModel) {
     return DbHelper.addComment(commentModel);
+  }
+  Future<void> addNotification(NotificationModel notification) {
+    return DbHelper.addNotification(notification);
   }
 
 }

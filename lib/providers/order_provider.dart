@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../auth/auth_service.dart';
 import '../db/db_helper.dart';
+import '../models/notification_model.dart';
 import '../models/order_constant_model.dart';
 import '../models/order_item.dart';
 
@@ -52,5 +53,9 @@ class OrderProvider extends ChangeNotifier {
   Future<void> saveOrder(OrderModel orderModel) async {
     await DbHelper.saveOrder(orderModel);
     return DbHelper.clearCart(orderModel.userId, orderModel.productDetails);
+  }
+
+  Future<void> addNotification(NotificationModel notification) {
+    return DbHelper.addNotification(notification);
   }
 }

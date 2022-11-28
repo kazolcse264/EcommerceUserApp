@@ -10,6 +10,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:provider/provider.dart';
 
 import '../auth/auth_service.dart';
+import '../models/notification_model.dart';
 import '../providers/cart_provider.dart';
 import '../providers/order_provider.dart';
 import '../providers/user_provider.dart';
@@ -325,6 +326,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
     try {
       await orderProvider.saveOrder(orderModel);
+      final notification = NotificationModel(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        type: NotificationType.order,
+        message: 'You have a new order #${orderModel.orderId}',
+        orderModel: orderModel,
+      );
+      await orderProvider.addNotification(notification);
       EasyLoading.dismiss();
       Navigator.pushNamedAndRemoveUntil(context, OrderSuccessfulPage.routeName,
           ModalRoute.withName(ViewProductPage.routeName));

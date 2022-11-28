@@ -5,6 +5,7 @@ import 'package:ecom_users/models/rating_model.dart';
 import '../models/cart_model.dart';
 import '../models/category_model.dart';
 import '../models/comment_model.dart';
+import '../models/notification_model.dart';
 import '../models/order_constant_model.dart';
 import '../models/product_models.dart';
 import '../models/purchase_model.dart';
@@ -283,5 +284,11 @@ class DbHelper {
     wb.update(
         userDoc, {userFieldAddressModel: orderModel.deliveryAddress.toMap()});
     return wb.commit();
+  }
+
+  static Future<void> addNotification(NotificationModel notification) {
+    return _db.collection(collectionNotification)
+        .doc(notification.id)
+        .set(notification.toMap());
   }
 }

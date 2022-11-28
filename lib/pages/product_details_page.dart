@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../auth/auth_service.dart';
 import '../custom_widgets/photo_frame_view.dart';
 import '../models/comment_model.dart';
+import '../models/notification_model.dart';
 import '../models/product_models.dart';
 import '../providers/cart_provider.dart';
 import '../providers/product_provider.dart';
@@ -285,11 +286,20 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                         );
                       } else {
                         EasyLoading.show(status: 'Please wait');
-                        await productProvider.addComment(
-                          productModel.productId!,
-                          txtController.text,
-                          userProvider.userModel!,
+                        final commentModel = CommentModel(
+                          userModel: userProvider.userModel!,
+                          productId: productModel.productId!,
+                          comment: txtController.text,
+                          date: getFormattedDate(DateTime.now(), pattern: 'dd/MM/yyyy hh:mm:s a'),
                         );
+                        await productProvider.addComment(commentModel);
+                        final notification = NotificationModel(
+                          id: DateTime.now().millisecondsSinceEpoch.toString(),
+                          type: NotificationType.comment,
+                          message: 'A new comment on ${productModel.productName} is waiting for your approval',
+                          commentModel: commentModel,
+                        );
+                        await productProvider.addNotification(notification);
                         EasyLoading.dismiss();
                         focusNode.unfocus();
                         if(mounted) {
